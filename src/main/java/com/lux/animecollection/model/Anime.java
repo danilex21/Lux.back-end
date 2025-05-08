@@ -44,6 +44,8 @@ public class Anime {
 	public Anime() {
 	}
 
+	
+
 	public Anime(Long id, String title, String description, String imageUrl, String status, Integer episodes,
 				 Double rating, String genre, String type, String releaseDate) {
 		this.id = id;
