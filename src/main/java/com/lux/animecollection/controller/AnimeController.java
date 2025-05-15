@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lux.animecollection.dto.AnimeDTO;
-import com.lux.animecollection.dto.AnimeResponseDTO;
 import com.lux.animecollection.model.Anime;
 import com.lux.animecollection.service.AnimeService;
 
@@ -29,32 +28,32 @@ public class AnimeController {
     private AnimeService animeService;
     
     @GetMapping
-    public List<AnimeResponseDTO> getAllAnimes() {
+    public List<AnimeDTO> getAllAnimes() {
         return animeService.getAllAnimes().stream()
-                .map(this::convertToResponseDTO)
+                .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<AnimeResponseDTO> getAnimeById(@PathVariable Long id) {
+    public ResponseEntity<AnimeDTO> getAnimeById(@PathVariable Long id) {
         return animeService.getAnimeById(id)
-                .map(this::convertToResponseDTO)
+                .map(this::convertToDTO)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
     
     @PostMapping
-    public AnimeResponseDTO createAnime(@RequestBody AnimeDTO animeDTO) {
+    public AnimeDTO createAnime(@RequestBody AnimeDTO animeDTO) {
         Anime anime = convertToEntity(animeDTO);
         Anime savedAnime = animeService.createAnime(anime);
-        return convertToResponseDTO(savedAnime);
+        return convertToDTO(savedAnime);
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<AnimeResponseDTO> updateAnime(@PathVariable Long id, @RequestBody AnimeDTO animeDTO) {
+    public ResponseEntity<AnimeDTO> updateAnime(@PathVariable Long id, @RequestBody AnimeDTO animeDTO) {
         Anime anime = convertToEntity(animeDTO);
         return animeService.updateAnime(id, anime)
-                .map(this::convertToResponseDTO)
+                .map(this::convertToDTO)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -68,30 +67,24 @@ public class AnimeController {
 
     private Anime convertToEntity(AnimeDTO dto) {
         Anime anime = new Anime();
+        // O id não deve ser definido na criação e será ignorado se for update
+        // pois é controlado pelo parâmetro do método
         anime.setTitle(dto.getTitle());
         anime.setDescription(dto.getDescription());
         anime.setImageUrl(dto.getImageUrl());
-        anime.setStatus(dto.getStatus());
-        anime.setEpisodes(dto.getEpisodes());
         anime.setRating(dto.getRating());
         anime.setGenre(dto.getGenre());
-        anime.setType(dto.getType());
-        anime.setReleaseDate(dto.getReleaseDate());
         return anime;
     }
 
-    private AnimeResponseDTO convertToResponseDTO(Anime anime) {
-        AnimeResponseDTO dto = new AnimeResponseDTO();
+    private AnimeDTO convertToDTO(Anime anime) {
+        AnimeDTO dto = new AnimeDTO();
         dto.setId(anime.getId());
         dto.setTitle(anime.getTitle());
         dto.setDescription(anime.getDescription());
         dto.setImageUrl(anime.getImageUrl());
-        dto.setStatus(anime.getStatus());
-        dto.setEpisodes(anime.getEpisodes());
         dto.setRating(anime.getRating());
         dto.setGenre(anime.getGenre());
-        dto.setType(anime.getType());
-        dto.setReleaseDate(anime.getReleaseDate());
         return dto;
     }
-} 
+}

@@ -1,35 +1,36 @@
 package com.lux.animecollection.dto;
 
 public class AnimeDTO {
+    private Long id;
     private String title;
     private String description;
     private String imageUrl;
-    private String status;
-    private Integer episodes;
     private Double rating;
     private String genre;
-    private String type;
-    private String releaseDate;
 
     // Construtor vazio
     public AnimeDTO() {
     }
 
     // Construtor com todos os campos
-    public AnimeDTO(String title, String description, String imageUrl, String status, Integer episodes,
-            Double rating, String genre, String type, String releaseDate) {
+    public AnimeDTO(Long id, String title, String description, String imageUrl, Double rating, String genre) {
+        this.id = id;
         this.title = title;
         this.description = description;
         this.imageUrl = imageUrl;
-        this.status = status;
-        this.episodes = episodes;
         this.rating = rating;
         this.genre = genre;
-        this.type = type;
-        this.releaseDate = releaseDate;
     }
 
     // Getters e Setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+    
     public String getTitle() {
         return title;
     }
@@ -54,22 +55,6 @@ public class AnimeDTO {
         this.imageUrl = imageUrl;
     }
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public Integer getEpisodes() {
-        return episodes;
-    }
-
-    public void setEpisodes(Integer episodes) {
-        this.episodes = episodes;
-    }
-
     public Double getRating() {
         return rating;
     }
@@ -84,21 +69,5 @@ public class AnimeDTO {
 
     public void setGenre(String genre) {
         this.genre = genre;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public String getReleaseDate() {
-        return releaseDate;
-    }
-
-    public void setReleaseDate(String releaseDate) {
-        this.releaseDate = releaseDate;
     }
 } 

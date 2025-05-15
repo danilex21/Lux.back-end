@@ -34,12 +34,8 @@ public class AnimeService {
             existingAnime.setTitle(animeDetails.getTitle());
             existingAnime.setDescription(animeDetails.getDescription());
             existingAnime.setImageUrl(animeDetails.getImageUrl());
-            existingAnime.setStatus(animeDetails.getStatus());
-            existingAnime.setEpisodes(animeDetails.getEpisodes());
             existingAnime.setRating(animeDetails.getRating());
             existingAnime.setGenre(animeDetails.getGenre());
-            existingAnime.setType(animeDetails.getType());
-            existingAnime.setReleaseDate(animeDetails.getReleaseDate());
             
             return Optional.of(animeRepository.save(existingAnime));
         }

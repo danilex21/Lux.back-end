@@ -14,7 +14,7 @@ public class Anime {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(length = 255)
+    @Column(name = "titulo", length = 255)
     private String title;
     
     @Column(columnDefinition = "LONGTEXT")
@@ -23,20 +23,10 @@ public class Anime {
     @Column(length = 1000)
     private String imageUrl;
     
-    @Column(length = 50)
-    private String status;
-    
-    private Integer episodes;
     private Double rating;
     
     @Column(length = 255)
     private String genre;
-    
-    @Column(length = 50)
-    private String type;
-    
-    @Column(length = 50)
-    private String releaseDate;
     
     
     
@@ -46,18 +36,13 @@ public class Anime {
 
 	
 
-	public Anime(Long id, String title, String description, String imageUrl, String status, Integer episodes,
-				 Double rating, String genre, String type, String releaseDate) {
+	public Anime(Long id, String title, String description, String imageUrl, Double rating, String genre) {
 		this.id = id;
 		this.title = title;
 		this.description = description;
 		this.imageUrl = imageUrl;
-		this.status = status;
-		this.episodes = episodes;
 		this.rating = rating;
 		this.genre = genre;
-		this.type = type;
-		this.releaseDate = releaseDate;
 	}
 
 	public Long getId() {
@@ -92,21 +77,7 @@ public class Anime {
 		this.imageUrl = imageUrl;
 	}
 
-	public String getStatus() {
-		return status;
-	}
 
-	public void setStatus(String status) {
-		this.status = status;
-	}
-
-	public Integer getEpisodes() {
-		return episodes;
-	}
-
-	public void setEpisodes(Integer episodes) {
-		this.episodes = episodes;
-	}
 
 	public Double getRating() {
 		return rating;
@@ -124,21 +95,7 @@ public class Anime {
 		this.genre = genre;
 	}
 
-	public String getType() {
-		return type;
-	}
 
-	public void setType(String type) {
-		this.type = type;
-	}
-
-	public String getReleaseDate() {
-		return releaseDate;
-	}
-
-	public void setReleaseDate(String releaseDate) {
-		this.releaseDate = releaseDate;
-	}
     
     
     
