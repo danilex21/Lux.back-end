@@ -19,14 +19,28 @@ import com.lux.animecollection.dto.AnimeDTO;
 import com.lux.animecollection.model.Anime;
 import com.lux.animecollection.service.AnimeService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("/api/animes")
 @CrossOrigin(origins = "*")
+@Tag(name = "Anime", description = "API para operações de gerenciamento de animes")
 public class AnimeController {
     
     @Autowired
     private AnimeService animeService;
     
+    @Operation(summary = "Listar todos os animes", description = "Retorna uma lista com todos os animes cadastrados")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Lista de animes recuperada com sucesso",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AnimeDTO.class)))
+    })
     @GetMapping
     public List<AnimeDTO> getAllAnimes() {
         return animeService.getAllAnimes().stream()
@@ -34,23 +48,45 @@ public class AnimeController {
                 .collect(Collectors.toList());
     }
     
+    @Operation(summary = "Obter anime por ID", description = "Retorna um único anime com base no ID fornecido")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Anime encontrado com sucesso",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AnimeDTO.class))),
+        @ApiResponse(responseCode = "404", description = "Anime não encontrado", content = @Content)
+    })
     @GetMapping("/{id}")
-    public ResponseEntity<AnimeDTO> getAnimeById(@PathVariable Long id) {
+    public ResponseEntity<AnimeDTO> getAnimeById(
+            @Parameter(description = "ID do anime a ser obtido", required = true) @PathVariable Long id) {
         return animeService.getAnimeById(id)
                 .map(this::convertToDTO)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
     
+    @Operation(summary = "Criar novo anime", description = "Cria um novo anime com as informações fornecidas")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Anime criado com sucesso",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AnimeDTO.class)))
+    })
     @PostMapping
-    public AnimeDTO createAnime(@RequestBody AnimeDTO animeDTO) {
+    public AnimeDTO createAnime(
+            @Parameter(description = "Dados do anime a ser criado", required = true)
+            @RequestBody AnimeDTO animeDTO) {
         Anime anime = convertToEntity(animeDTO);
         Anime savedAnime = animeService.createAnime(anime);
         return convertToDTO(savedAnime);
     }
     
+    @Operation(summary = "Atualizar anime", description = "Atualiza um anime existente com base no ID fornecido")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Anime atualizado com sucesso",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AnimeDTO.class))),
+        @ApiResponse(responseCode = "404", description = "Anime não encontrado", content = @Content)
+    })
     @PutMapping("/{id}")
-    public ResponseEntity<AnimeDTO> updateAnime(@PathVariable Long id, @RequestBody AnimeDTO animeDTO) {
+    public ResponseEntity<AnimeDTO> updateAnime(
+            @Parameter(description = "ID do anime a ser atualizado", required = true) @PathVariable Long id,
+            @Parameter(description = "Novos dados do anime", required = true) @RequestBody AnimeDTO animeDTO) {
         Anime anime = convertToEntity(animeDTO);
         return animeService.updateAnime(id, anime)
                 .map(this::convertToDTO)
@@ -58,8 +94,14 @@ public class AnimeController {
                 .orElse(ResponseEntity.notFound().build());
     }
     
+    @Operation(summary = "Excluir anime", description = "Remove um anime com base no ID fornecido")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Anime excluído com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Anime não encontrado", content = @Content)
+    })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAnime(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteAnime(
+            @Parameter(description = "ID do anime a ser excluído", required = true) @PathVariable Long id) {
         return animeService.deleteAnime(id)
                 ? ResponseEntity.ok().build()
                 : ResponseEntity.notFound().build();
