@@ -50,7 +50,6 @@ O projeto usa as seguintes tecnologias:
 - Spring Boot
 - Spring Data JPA
 - MySQL
-- Lombok
 - Spring Boot DevTools
 
 ## Configuração do Banco de Dados
