@@ -5,7 +5,7 @@ Este é o backend do aplicativo Anime Collection, desenvolvido com Spring Boot 3
 ## Requisitos 📋
 
 - Java 21 ☕
-- MySQL 8.0+ 🛢️
+- MySQL 🛢️
 - Maven 🔧
 
 ## Configuração ⚙️
