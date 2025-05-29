@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -40,21 +41,30 @@ public class AnimeService {
         }
     }
     
-    public Optional<Anime> updateAnime(Long id, Anime animeDetails) {
-        Optional<Anime> anime = animeRepository.findById(id);
-        
-        if (anime.isPresent()) {
-            Anime existingAnime = anime.get();
-            existingAnime.setTitle(animeDetails.getTitle());
-            existingAnime.setDescription(animeDetails.getDescription());
-            existingAnime.setImageUrl(animeDetails.getImageUrl());
-            existingAnime.setRating(animeDetails.getRating());
-            existingAnime.setGenre(animeDetails.getGenre());
+    @Transactional
+    public Anime updateAnime(Long id, Anime animeDetails) {
+        return animeRepository.findById(id).map(existingAnime -> {
+            // Update only the fields that are not null in animeDetails
+            if (animeDetails.getTitle() != null) {
+                existingAnime.setTitle(animeDetails.getTitle());
+            }
+            if (animeDetails.getDescription() != null) {
+                existingAnime.setDescription(animeDetails.getDescription());
+            }
+            if (animeDetails.getRating() != null) {
+                existingAnime.setRating(animeDetails.getRating());
+            }
+            if (animeDetails.getGenre() != null) {
+                existingAnime.setGenre(animeDetails.getGenre());
+            }
+            // Update image data if provided
+            if (animeDetails.getImageData() != null) {
+                existingAnime.setImageData(animeDetails.getImageData());
+                existingAnime.setImageType(animeDetails.getImageType());
+            }
             
-            return Optional.of(animeRepository.save(existingAnime));
-        }
-        
-        return Optional.empty();
+            return animeRepository.save(existingAnime);
+        }).orElse(null);
     }
     
     public boolean deleteAnime(Long id) {
