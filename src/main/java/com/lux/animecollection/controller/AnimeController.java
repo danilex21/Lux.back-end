@@ -1,23 +1,16 @@
 package com.lux.animecollection.controller;
 
 import java.io.IOException;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
-import java.util.Base64;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.lux.animecollection.dto.AnimeDTO;
@@ -84,36 +77,35 @@ public class AnimeController {
                 .orElse(ResponseEntity.notFound().build());
     }
     
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Criar novo anime", description = "Cria um novo anime com as informações fornecidas")
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Criar um novo anime com imagem", description = "Cria um novo anime com os dados fornecidos")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Anime criado com sucesso",
+        @ApiResponse(responseCode = "201", description = "Anime criado com sucesso",
             content = @Content(mediaType = "application/json", 
             schema = @Schema(implementation = AnimeDTO.class))),
-        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+        @ApiResponse(responseCode = "400", description = "Dados inválidos fornecidos")
     })
     public ResponseEntity<AnimeDTO> createAnime(
             @RequestParam("title") String title,
-            @RequestParam("description") String description,
-            @RequestParam(value = "genre", required = false) String genre,
+            @RequestParam(value = "description", required = false) String description,
             @RequestParam(value = "rating", required = false) Double rating,
-            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile) {
+            @RequestParam(value = "genre", required = false) String genre,
+            @RequestParam(value = "file", required = false) MultipartFile file) {
         
         try {
             Anime anime = new Anime();
             anime.setTitle(title);
             anime.setDescription(description);
+            anime.setRating(rating);
             anime.setGenre(genre);
-            anime.setRating(rating != null ? rating : 0.0);
             
-            if (imageFile != null && !imageFile.isEmpty()) {
-                anime.setImageData(imageFile.getBytes());
-                anime.setImageType(imageFile.getContentType());
+            if (file != null && !file.isEmpty()) {
+                anime.setImageData(file.getBytes());
+                anime.setImageType(file.getContentType());
             }
             
             Anime savedAnime = animeService.createAnime(anime);
-            return ResponseEntity.ok(convertToDTO(savedAnime));
+            return new ResponseEntity<>(convertToDTO(savedAnime), HttpStatus.CREATED);
             
         } catch (IOException e) {
             e.printStackTrace();
@@ -121,61 +113,21 @@ public class AnimeController {
         }
     }
     
-    @PostMapping(value = "/{id}/image", 
-                consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
-                produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Upload de imagem", description = "Faz upload de uma imagem para um anime existente")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Imagem enviada com sucesso"),
-        @ApiResponse(responseCode = "400", description = "Nenhum arquivo enviado"),
-        @ApiResponse(responseCode = "404", description = "Anime não encontrado"),
-        @ApiResponse(responseCode = "500", description = "Falha ao fazer upload da imagem")
-    })
-    public ResponseEntity<AnimeDTO> uploadImage(
-            @Parameter(description = "ID do anime", required = true) @PathVariable Long id,
-            @Parameter(description = "Arquivo de imagem para upload (PNG, JPG, JPEG)", required = true)
-            @RequestParam("file") MultipartFile file) {
-        
-        if (file.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
-        
-        try {
-            Optional<Anime> animeOpt = animeService.getAnimeById(id);
-            if (!animeOpt.isPresent()) {
-                return ResponseEntity.notFound().build();
-            }
-            
-            Anime anime = animeOpt.get();
-            anime.setImageData(file.getBytes());
-            anime.setImageType(file.getContentType());
-            
-            Anime updatedAnime = animeService.updateAnime(id, anime);
-            if (updatedAnime != null) {
-                return ResponseEntity.ok(convertToDTO(updatedAnime));
-            } else {
-                return ResponseEntity.notFound().build();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().build();
-        }
-    }
-    
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "Atualizar anime", description = "Atualiza um anime existente com base no ID fornecido")
+    @Operation(summary = "Atualizar um anime existente", description = "Atualiza um anime existente com os dados fornecidos")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Anime atualizado com sucesso",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AnimeDTO.class))),
-        @ApiResponse(responseCode = "404", description = "Anime não encontrado", content = @Content)
+            content = @Content(mediaType = "application/json", 
+            schema = @Schema(implementation = AnimeDTO.class))),
+        @ApiResponse(responseCode = "404", description = "Anime não encontrado")
     })
     public ResponseEntity<AnimeDTO> updateAnime(
             @Parameter(description = "ID do anime a ser atualizado", required = true) @PathVariable Long id,
             @RequestParam(value = "title", required = false) String title,
             @RequestParam(value = "description", required = false) String description,
-            @RequestParam(value = "genre", required = false) String genre,
             @RequestParam(value = "rating", required = false) Double rating,
-            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile) {
+            @RequestParam(value = "genre", required = false) String genre,
+            @RequestParam(value = "file", required = false) MultipartFile file) {
         
         try {
             Optional<Anime> existingAnimeOpt = animeService.getAnimeById(id);
@@ -184,14 +136,23 @@ public class AnimeController {
             }
             
             Anime existingAnime = existingAnimeOpt.get();
-            if (title != null) existingAnime.setTitle(title);
-            if (description != null) existingAnime.setDescription(description);
-            if (genre != null) existingAnime.setGenre(genre);
-            if (rating != null) existingAnime.setRating(rating);
             
-            if (imageFile != null && !imageFile.isEmpty()) {
-                existingAnime.setImageData(imageFile.getBytes());
-                existingAnime.setImageType(imageFile.getContentType());
+            if (title != null) {
+                existingAnime.setTitle(title);
+            }
+            if (description != null) {
+                existingAnime.setDescription(description);
+            }
+            if (rating != null) {
+                existingAnime.setRating(rating);
+            }
+            if (genre != null) {
+                existingAnime.setGenre(genre);
+            }
+            
+            if (file != null && !file.isEmpty()) {
+                existingAnime.setImageData(file.getBytes());
+                existingAnime.setImageType(file.getContentType());
             }
             
             Anime updatedAnime = animeService.updateAnime(id, existingAnime);
@@ -207,20 +168,20 @@ public class AnimeController {
         }
     }
     
-    @Operation(summary = "Excluir anime", description = "Remove um anime com base no ID fornecido")
+    @Operation(summary = "Deletar anime", description = "Remove um anime existente com base no ID fornecido")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Anime excluído com sucesso"),
+        @ApiResponse(responseCode = "204", description = "Anime removido com sucesso"),
         @ApiResponse(responseCode = "404", description = "Anime não encontrado", content = @Content)
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAnime(
             @Parameter(description = "ID do anime a ser excluído", required = true) @PathVariable Long id) {
         return animeService.deleteAnime(id)
-                ? ResponseEntity.ok().build()
+                ? ResponseEntity.noContent().build()
                 : ResponseEntity.notFound().build();
     }
 
-    protected AnimeDTO convertToDTO(Anime anime) {
+    private AnimeDTO convertToDTO(Anime anime) {
         if (anime == null) {
             return null;
         }
@@ -229,16 +190,12 @@ public class AnimeController {
         dto.setId(anime.getId());
         dto.setTitle(anime.getTitle());
         dto.setDescription(anime.getDescription());
-        dto.setRating(anime.getRating() != null ? anime.getRating() : 0.0);
-        dto.setGenre(anime.getGenre());
-        
-        // If there's image data, create a data URL
         if (anime.getImageData() != null && anime.getImageType() != null) {
             String base64Image = Base64.getEncoder().encodeToString(anime.getImageData());
-            String imageUrl = "data:" + anime.getImageType() + ";base64," + base64Image;
-            dto.setImageUrl(imageUrl);
+            dto.setImageUrl("data:" + anime.getImageType() + ";base64," + base64Image);
         }
-        
+        dto.setRating(anime.getRating());
+        dto.setGenre(anime.getGenre());
         return dto;
     }
 
