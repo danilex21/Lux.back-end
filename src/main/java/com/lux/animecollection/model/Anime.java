@@ -18,14 +18,9 @@ public class Anime {
     @Column(columnDefinition = "LONGTEXT")
     private String description;
     
-    @Lob
-    @Column(columnDefinition = "LONGBLOB")
-    private byte[] imageData;
+    private String imageUrl;
     
-    @Column(name = "image_type", length = 100)
-    private String imageType;
-    
-    private Double rating = 0.0;
+    private Double rating;
     
     @Column(length = 255)
     private String genre;
@@ -33,12 +28,11 @@ public class Anime {
     public Anime() {
     }
 
-    public Anime(Long id, String title, String description, byte[] imageData, String imageType, Double rating, String genre) {
+    public Anime(Long id, String title, String description, String imageUrl, Double rating, String genre) {
         this.id = id;
         this.title = title;
         this.description = description;
-        this.imageData = imageData;
-        this.imageType = imageType;
+        this.imageUrl = imageUrl;
         this.rating = rating;
         this.genre = genre;
     }
@@ -68,22 +62,14 @@ public class Anime {
     }
 
     public String getImageUrl() {
-        if (imageData == null || imageType == null) {
+        if (imageUrl == null) {
             return null;
         }
-        return "data:" + imageType + ";base64," + Base64.getEncoder().encodeToString(imageData);
+        return imageUrl;
     }
 
     public void setImageUrl(String imageUrl) {
-        if (imageUrl != null && imageUrl.contains(",")) {
-            String[] parts = imageUrl.split(",");
-            if (parts.length > 1) {
-                this.imageData = Base64.getDecoder().decode(parts[1]);
-                if (parts[0].contains(":") && parts[0].contains(";")) {
-                    this.imageType = parts[0].substring(parts[0].indexOf(":") + 1, parts[0].indexOf(";"));
-                }
-            }
-        }
+        this.imageUrl = imageUrl;
     }
 
     public Double getRating() {
@@ -91,7 +77,7 @@ public class Anime {
     }
 
     public void setRating(Double rating) {
-        this.rating = rating != null ? rating : 0.0;
+        this.rating = rating;
     }
 
     public String getGenre() {
@@ -100,21 +86,5 @@ public class Anime {
 
     public void setGenre(String genre) {
         this.genre = genre;
-    }
-
-    public byte[] getImageData() {
-        return imageData;
-    }
-
-    public void setImageData(byte[] imageData) {
-        this.imageData = imageData;
-    }
-
-    public String getImageType() {
-        return imageType;
-    }
-
-    public void setImageType(String imageType) {
-        this.imageType = imageType;
     }
 }

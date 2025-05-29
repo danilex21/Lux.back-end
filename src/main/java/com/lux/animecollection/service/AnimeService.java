@@ -41,36 +41,21 @@ public class AnimeService {
     
     @Transactional
     public Anime updateAnime(Long id, Anime animeDetails) {
-        logger.info("Atualizando anime com ID: {}", id);
         return animeRepository.findById(id).map(existingAnime -> {
-            if (animeDetails.getTitle() != null) {
-                existingAnime.setTitle(animeDetails.getTitle());
-            }
-            if (animeDetails.getDescription() != null) {
-                existingAnime.setDescription(animeDetails.getDescription());
-            }
-            if (animeDetails.getRating() != null) {
-                existingAnime.setRating(animeDetails.getRating());
-            }
-            if (animeDetails.getGenre() != null) {
-                existingAnime.setGenre(animeDetails.getGenre());
-            }
-            if (animeDetails.getImageData() != null) {
-                existingAnime.setImageData(animeDetails.getImageData());
-                existingAnime.setImageType(animeDetails.getImageType());
-            }
+            existingAnime.setTitle(animeDetails.getTitle());
+            existingAnime.setDescription(animeDetails.getDescription());
+            existingAnime.setRating(animeDetails.getRating());
+            existingAnime.setGenre(animeDetails.getGenre());
             return animeRepository.save(existingAnime);
         }).orElse(null);
     }
     
     @Transactional
     public boolean deleteAnime(Long id) {
-        logger.info("Deletando anime com ID: {}", id);
         try {
             animeRepository.deleteById(id);
             return true;
         } catch (Exception e) {
-            logger.error("Erro ao deletar anime com ID {}: {}", id, e.getMessage());
             return false;
         }
     }
