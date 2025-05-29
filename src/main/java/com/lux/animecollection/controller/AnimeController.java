@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -65,56 +64,27 @@ public class AnimeController {
      * @param anime O objeto anime a ser criado
      * @return O DTO do anime criado
      */
-    @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<?> createAnime(
-            @RequestPart(value = "anime", required = false) String animeJson,
-            @RequestPart(value = "animeData", required = false) Anime animeData,
-            @RequestPart(value = "image", required = false) MultipartFile imageFile) {
+    @PostMapping
+    public ResponseEntity<?> createAnime(@RequestBody Anime anime) {
         try {
-            Anime anime;
-            
-            // Se veio como JSON
-            if (animeJson != null && !animeJson.isEmpty()) {
-                ObjectMapper objectMapper = new ObjectMapper();
-                anime = objectMapper.readValue(animeJson, Anime.class);
-            } 
-            // Se veio como objeto direto
-            else if (animeData != null) {
-                anime = animeData;
-            } else {
-                return ResponseEntity.badRequest().body("Dados do anime não fornecidos");
-            }
-            
             if (anime.getTitle() == null || anime.getTitle().trim().isEmpty()) {
                 return ResponseEntity.badRequest().body("O título do anime é obrigatório");
-            }
-            
-            // Se não veio imagem mas tem URL de imagem
-            if ((imageFile == null || imageFile.isEmpty()) && anime.getImageUrl() != null) {
-                // Aqui você pode adicionar lógica para baixar a imagem da URL se necessário
-                // Por enquanto, apenas vamos aceitar a URL
-            } 
-            // Se veio uma imagem no upload
-            else if (imageFile != null && !imageFile.isEmpty()) {
-                if (!imageFile.getContentType().startsWith("image/")) {
-                    return ResponseEntity.badRequest().body("O arquivo deve ser uma imagem");
-                }
-                anime.setImageData(imageFile.getBytes());
-                anime.setImageType(imageFile.getContentType());
             }
             
             Anime createdAnime = animeService.createAnime(anime);
             return ResponseEntity.ok(convertToDTO(createdAnime));
             
-        } catch (IOException e) {
-            return ResponseEntity.badRequest().body("Erro ao processar a requisição: " + e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Erro interno ao processar a requisição: " + e.getMessage());
+            return ResponseEntity.internalServerError().body("Erro ao salvar o anime: " + e.getMessage());
         }
     }
 
-         
-    
+    /**
+     * Retorna a imagem de um anime específico.
+     * 
+     * @param id O identificador único do anime
+     * @return A imagem do anime encontrado ou 404 se não existir
+     */
     @GetMapping("/{id}/image")
     public ResponseEntity<byte[]> getAnimeImage(@PathVariable Long id) {
         return animeService.getAnimeById(id)
