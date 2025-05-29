@@ -1,22 +1,18 @@
 package com.lux.animecollection.controller;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import com.lux.animecollection.dto.AnimeDTO;
 import com.lux.animecollection.model.Anime;
 import com.lux.animecollection.service.AnimeService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Controlador responsável por gerenciar as operações de API relacionadas aos animes.
@@ -63,9 +59,20 @@ public class AnimeController {
      * @param anime O objeto anime a ser criado
      * @return O DTO do anime criado
      */
-    @PostMapping
-    public AnimeDTO createAnime(@RequestBody Anime anime) {
-        return convertToDTO(animeService.createAnime(anime));
+    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<AnimeDTO> createAnime(
+            @RequestPart("anime") Anime anime,
+            @RequestPart(value = "image", required = false) MultipartFile imageFile) {
+        try {
+            if (imageFile != null && !imageFile.isEmpty()) {
+                anime.setImageData(imageFile.getBytes());
+                anime.setImageType(imageFile.getContentType());
+            }
+            Anime createdAnime = animeService.createAnime(anime);
+            return ResponseEntity.ok(convertToDTO(createdAnime));
+        } catch (IOException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     /**
@@ -75,9 +82,34 @@ public class AnimeController {
      * @param animeDetails As novas informações do anime
      * @return O DTO do anime atualizado
      */
-    @PutMapping("/{id}")
-    public AnimeDTO updateAnime(@PathVariable Long id, @RequestBody Anime animeDetails) {
-        return convertToDTO(animeService.updateAnime(id, animeDetails));
+    @PutMapping(value = "/{id}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<AnimeDTO> updateAnime(
+            @PathVariable Long id,
+            @RequestPart("anime") Anime animeDetails,
+            @RequestPart(value = "image", required = false) MultipartFile imageFile) {
+        try {
+            if (imageFile != null && !imageFile.isEmpty()) {
+                animeDetails.setImageData(imageFile.getBytes());
+                animeDetails.setImageType(imageFile.getContentType());
+            }
+            Anime updatedAnime = animeService.updateAnime(id, animeDetails);
+            if (updatedAnime != null) {
+                return ResponseEntity.ok(convertToDTO(updatedAnime));
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (IOException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    
+    @GetMapping("/{id}/image")
+    public ResponseEntity<byte[]> getAnimeImage(@PathVariable Long id) {
+        return animeService.getAnimeById(id)
+                .map(anime -> ResponseEntity.ok()
+                        .contentType(MediaType.parseMediaType(anime.getImageType()))
+                        .body(anime.getImageData()))
+                .orElse(ResponseEntity.notFound().build());
     }
 
     /**
@@ -98,12 +130,20 @@ public class AnimeController {
      * @return O DTO correspondente à entidade
      */
     private AnimeDTO convertToDTO(Anime anime) {
+        if (anime == null) return null;
+        
         AnimeDTO dto = new AnimeDTO();
         dto.setId(anime.getId());
         dto.setTitle(anime.getTitle());
         dto.setDescription(anime.getDescription());
         dto.setRating(anime.getRating());
         dto.setGenre(anime.getGenre());
+        
+        // Set image URL if image data exists
+        if (anime.getImageData() != null && anime.getImageType() != null) {
+            dto.setImageUrl(anime.getImageUrl());
+        }
+        
         return dto;
     }
 }

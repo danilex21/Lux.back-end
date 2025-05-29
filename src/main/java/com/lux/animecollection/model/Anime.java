@@ -18,7 +18,12 @@ public class Anime {
     @Column(columnDefinition = "LONGTEXT")
     private String description;
     
-    private String imageUrl;
+    @Lob
+    @Column(columnDefinition = "LONGBLOB")
+    private byte[] imageData;
+    
+    @Column(name = "image_type")
+    private String imageType;
     
     private Double rating;
     
@@ -32,7 +37,6 @@ public class Anime {
         this.id = id;
         this.title = title;
         this.description = description;
-        this.imageUrl = imageUrl;
         this.rating = rating;
         this.genre = genre;
     }
@@ -62,14 +66,38 @@ public class Anime {
     }
 
     public String getImageUrl() {
-        if (imageUrl == null) {
+        if (imageData == null || imageType == null) {
             return null;
         }
-        return imageUrl;
+        return "data:" + imageType + ";base64," + java.util.Base64.getEncoder().encodeToString(imageData);
     }
 
     public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+        if (imageUrl != null && imageUrl.contains(",")) {
+            String[] parts = imageUrl.split(",");
+            if (parts.length > 1) {
+                this.imageData = java.util.Base64.getDecoder().decode(parts[1]);
+                if (parts[0].contains(":") && parts[0].contains(";")) {
+                    this.imageType = parts[0].substring(parts[0].indexOf(":") + 1, parts[0].indexOf(";"));
+                }
+            }
+        }
+    }
+    
+    public byte[] getImageData() {
+        return imageData;
+    }
+    
+    public void setImageData(byte[] imageData) {
+        this.imageData = imageData;
+    }
+    
+    public String getImageType() {
+        return imageType;
+    }
+    
+    public void setImageType(String imageType) {
+        this.imageType = imageType;
     }
 
     public Double getRating() {

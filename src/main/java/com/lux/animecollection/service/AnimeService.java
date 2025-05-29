@@ -42,10 +42,22 @@ public class AnimeService {
     @Transactional
     public Anime updateAnime(Long id, Anime animeDetails) {
         return animeRepository.findById(id).map(existingAnime -> {
-            existingAnime.setTitle(animeDetails.getTitle());
-            existingAnime.setDescription(animeDetails.getDescription());
-            existingAnime.setRating(animeDetails.getRating());
-            existingAnime.setGenre(animeDetails.getGenre());
+            if (animeDetails.getTitle() != null) {
+                existingAnime.setTitle(animeDetails.getTitle());
+            }
+            if (animeDetails.getDescription() != null) {
+                existingAnime.setDescription(animeDetails.getDescription());
+            }
+            if (animeDetails.getRating() != null) {
+                existingAnime.setRating(animeDetails.getRating());
+            }
+            if (animeDetails.getGenre() != null) {
+                existingAnime.setGenre(animeDetails.getGenre());
+            }
+            if (animeDetails.getImageData() != null) {
+                existingAnime.setImageData(animeDetails.getImageData());
+                existingAnime.setImageType(animeDetails.getImageType());
+            }
             return animeRepository.save(existingAnime);
         }).orElse(null);
     }
