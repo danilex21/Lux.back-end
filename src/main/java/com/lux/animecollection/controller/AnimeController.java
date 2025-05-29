@@ -1,5 +1,6 @@
 package com.lux.animecollection.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lux.animecollection.dto.AnimeDTO;
 import com.lux.animecollection.model.Anime;
 import com.lux.animecollection.service.AnimeService;
@@ -8,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 
 import java.io.IOException;
 import java.util.List;
@@ -20,7 +22,11 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/api/animes")
-@CrossOrigin("*")
+@CrossOrigin(
+    origins = "*",
+    allowedHeaders = {"Content-Type", "Authorization"},
+    methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE}
+)
 public class AnimeController {
 
     /**
@@ -75,33 +81,33 @@ public class AnimeController {
         }
     }
 
-    /**
-     * Atualiza um anime existente com novas informações.
-     * 
-     * @param id O identificador único do anime a ser atualizado
-     * @param animeDetails As novas informações do anime
-     * @return O DTO do anime atualizado
-     */
-    @PutMapping(value = "/{id}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<AnimeDTO> updateAnime(
-            @PathVariable Long id,
-            @RequestPart("anime") Anime animeDetails,
-            @RequestPart(value = "image", required = false) MultipartFile imageFile) {
-        try {
-            if (imageFile != null && !imageFile.isEmpty()) {
-                animeDetails.setImageData(imageFile.getBytes());
-                animeDetails.setImageType(imageFile.getContentType());
-            }
-            Anime updatedAnime = animeService.updateAnime(id, animeDetails);
-            if (updatedAnime != null) {
-                return ResponseEntity.ok(convertToDTO(updatedAnime));
-            } else {
-                return ResponseEntity.notFound().build();
-            }
-        } catch (IOException e) {
-            return ResponseEntity.badRequest().build();
+    
+     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
+public ResponseEntity<AnimeDTO> createAnime(
+        @RequestPart(value = "anime", required = false) String animeJson,
+        @RequestPart(value = "image", required = false) MultipartFile imageFile) {
+    try {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Anime anime;
+        
+        if (animeJson != null && !animeJson.isEmpty()) {
+            anime = objectMapper.readValue(animeJson, Anime.class);
+        } else {
+            return ResponseEntity.badRequest().body(null);
         }
+
+        if (imageFile != null && !imageFile.isEmpty()) {
+            anime.setImageData(imageFile.getBytes());
+            anime.setImageType(imageFile.getContentType());
+        }
+        
+        Anime createdAnime = animeService.createAnime(anime);
+        return ResponseEntity.ok(convertToDTO(createdAnime));
+    } catch (IOException e) {
+        return ResponseEntity.badRequest().build();
     }
+}
+         
     
     @GetMapping("/{id}/image")
     public ResponseEntity<byte[]> getAnimeImage(@PathVariable Long id) {
