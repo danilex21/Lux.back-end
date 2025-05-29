@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,7 +36,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/api/animes")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = {"http://localhost:8081", "https://anime-collection-nf6r.onrender.com"}, 
+    allowedHeaders = "*", 
+    allowCredentials = "true",
+    maxAge = 3600)
 @Tag(name = "Anime", description = "API para operações de gerenciamento de animes")
 public class AnimeController {
     
@@ -71,7 +77,8 @@ public class AnimeController {
     }
     
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
-                produces = MediaType.APPLICATION_JSON_VALUE)
+                produces = MediaType.APPLICATION_JSON_VALUE,
+                headers = "Content-Type=multipart/form-data")
     @Operation(summary = "Criar novo anime", description = "Cria um novo anime com as informações fornecidas")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Anime criado com sucesso",
@@ -119,7 +126,8 @@ public class AnimeController {
     
     @PostMapping(value = "/upload", 
                 consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
-                produces = MediaType.APPLICATION_JSON_VALUE)
+                produces = MediaType.APPLICATION_JSON_VALUE,
+                headers = "Content-Type=multipart/form-data")
     @Operation(summary = "Upload de imagem", description = "Faz upload de uma imagem para o servidor")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Imagem enviada com sucesso"),
