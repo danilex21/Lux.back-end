@@ -66,47 +66,35 @@ public class AnimeController {
      * @return O DTO do anime criado
      */
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<AnimeDTO> createAnime(
-            @RequestPart("anime") Anime anime,
+    public ResponseEntity<?> createAnime(
+            @RequestPart("anime") String animeJson,
             @RequestPart(value = "image", required = false) MultipartFile imageFile) {
         try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            Anime anime = objectMapper.readValue(animeJson, Anime.class);
+            
+            if (anime.getTitle() == null || anime.getTitle().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("O título do anime é obrigatório");
+            }
+            
             if (imageFile != null && !imageFile.isEmpty()) {
+                if (!imageFile.getContentType().startsWith("image/")) {
+                    return ResponseEntity.badRequest().body("O arquivo deve ser uma imagem");
+                }
                 anime.setImageData(imageFile.getBytes());
                 anime.setImageType(imageFile.getContentType());
             }
+            
             Anime createdAnime = animeService.createAnime(anime);
             return ResponseEntity.ok(convertToDTO(createdAnime));
+            
         } catch (IOException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body("Erro ao processar a requisição: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Erro interno ao processar a requisição");
         }
     }
 
-    
-     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
-public ResponseEntity<AnimeDTO> createAnime(
-        @RequestPart(value = "anime", required = false) String animeJson,
-        @RequestPart(value = "image", required = false) MultipartFile imageFile) {
-    try {
-        ObjectMapper objectMapper = new ObjectMapper();
-        Anime anime;
-        
-        if (animeJson != null && !animeJson.isEmpty()) {
-            anime = objectMapper.readValue(animeJson, Anime.class);
-        } else {
-            return ResponseEntity.badRequest().body(null);
-        }
-
-        if (imageFile != null && !imageFile.isEmpty()) {
-            anime.setImageData(imageFile.getBytes());
-            anime.setImageType(imageFile.getContentType());
-        }
-        
-        Anime createdAnime = animeService.createAnime(anime);
-        return ResponseEntity.ok(convertToDTO(createdAnime));
-    } catch (IOException e) {
-        return ResponseEntity.badRequest().build();
-    }
-}
          
     
     @GetMapping("/{id}/image")
