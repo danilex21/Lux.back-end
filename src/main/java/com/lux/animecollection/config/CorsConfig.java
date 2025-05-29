@@ -8,33 +8,21 @@ import org.springframework.web.filter.CorsFilter;
 
 @Configuration
 public class CorsConfig {
-    
+
     @Bean
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         
-        // Permite requisições de qualquer origem (em produção, especifique as origens permitidas)
-        config.addAllowedOrigin("*");
-        config.addAllowedOrigin("http://localhost:3000");
-        config.addAllowedOrigin("http://localhost:8080");
-        config.addAllowedOrigin("http://localhost:8081");
-        
-        // Permite todos os métodos HTTP
+        // Allow all origins, methods, and headers for development
+        config.setAllowCredentials(true);
+        config.addAllowedOrigin("http://localhost:8081"); // Your frontend URL
+        config.addAllowedOrigin("http://localhost:3000"); // Common React dev server port
+        config.addAllowedOrigin("https://anime-collection-nf6r.onrender.com"); // Your backend URL
+        config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         
-        // Permite todos os cabeçalhos
-        config.addAllowedHeader("*");
-        
-        // Permite credenciais (cookies, autenticação)
-        config.setAllowCredentials(true);
-        
-        // Configura o tempo máximo que a resposta de preflight pode ser armazenada em cache
-        config.setMaxAge(3600L);
-        
-        // Aplica a configuração a todos os endpoints
         source.registerCorsConfiguration("/**", config);
-        
         return new CorsFilter(source);
     }
 }
