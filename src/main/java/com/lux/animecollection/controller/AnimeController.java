@@ -107,7 +107,7 @@ public class AnimeController {
                 : ResponseEntity.notFound().build();
     }
 
-    private Anime convertToEntity(AnimeDTO dto) {
+    protected Anime convertToEntity(AnimeDTO dto) {
         if (dto == null) {
             return null;
         }
@@ -127,14 +127,22 @@ public class AnimeController {
         return anime;
     }
 
-    private AnimeDTO convertToDTO(Anime anime) {
-        AnimeDTO dto = new AnimeDTO();
-        dto.setId(anime.getId());
-        dto.setTitle(anime.getTitle());
-        dto.setDescription(anime.getDescription());
-        dto.setImageUrl(anime.getImageUrl());
-        dto.setRating(anime.getRating());
-        dto.setGenre(anime.getGenre());
-        return dto;
+    protected AnimeDTO convertToDTO(Anime anime) {
+        if (anime == null) {
+            return null;
+        }
+        
+        AnimeDTO animeDto = new AnimeDTO();
+        animeDto.setId(anime.getId());
+        animeDto.setTitle(anime.getTitle());
+        animeDto.setDescription(anime.getDescription());
+        animeDto.setImageUrl(anime.getImageUrl());
+        
+        // Garante que o rating seja sempre um Double válido
+        Double animeRating = anime.getRating();
+        animeDto.setRating(animeRating != null ? animeRating : 0.0);
+        
+        animeDto.setGenre(anime.getGenre());
+        return animeDto;
     }
 }

@@ -8,13 +8,10 @@ Este é o backend do aplicativo Anime Collection, desenvolvido com Spring Boot 3
 - MySQL 🛢️
 - Maven 🔧
 
-## Configuração ⚙️
-
-1. Clone o repositório 📥
-2. Configure o banco de dados MySQL no arquivo `src/main/resources/application.properties` 📝
-3. Execute o comando: `mvn spring-boot:run` 🏃
-
 ## Endpoints da API 🌐
+
+ **Acesse a documentação da API**
+   - Abra o navegador e acesse: http://localhost:8080/swagger-ui.html
 
 ### Animes 📺
 
