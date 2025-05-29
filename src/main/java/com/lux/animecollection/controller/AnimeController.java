@@ -108,6 +108,10 @@ public class AnimeController {
     }
 
     private Anime convertToEntity(AnimeDTO dto) {
+        if (dto == null) {
+            return null;
+        }
+        
         Anime anime = new Anime();
         // O id não deve ser definido na criação e será ignorado se for update
         // pois é controlado pelo parâmetro do método
@@ -115,22 +119,9 @@ public class AnimeController {
         anime.setDescription(dto.getDescription());
         anime.setImageUrl(dto.getImageUrl());
         
-        // Converte o rating para Double, independente se veio como String ou Double
-        if (dto.getRating() != null) {
-            if (dto.getRating() instanceof String) {
-                try {
-                    anime.setRating(Double.parseDouble((String) dto.getRating()));
-                } catch (NumberFormatException e) {
-                    anime.setRating(0.0);
-                }
-            } else if (dto.getRating() instanceof Double) {
-                anime.setRating((Double) dto.getRating());
-            } else {
-                anime.setRating(0.0);
-            }
-        } else {
-            anime.setRating(0.0);
-        }
+        // Garante que o rating seja sempre um Double válido
+        Double animeRating = dto.getRating();
+        anime.setRating(animeRating != null ? animeRating : 0.0);
         
         anime.setGenre(dto.getGenre());
         return anime;

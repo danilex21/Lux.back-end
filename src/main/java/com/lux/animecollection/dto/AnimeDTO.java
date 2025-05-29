@@ -5,7 +5,7 @@ public class AnimeDTO {
     private String title;
     private String description;
     private String imageUrl;
-    private Object rating; // Can be String or Double
+    private Double rating;
     private String genre;
 
     // Construtor vazio
@@ -56,19 +56,10 @@ public class AnimeDTO {
     }
 
     public Double getRating() {
-        if (rating == null) return 0.0;
-        if (rating instanceof Double) return (Double) rating;
-        if (rating instanceof String) {
-            try {
-                return Double.parseDouble((String) rating);
-            } catch (NumberFormatException e) {
-                return 0.0;
-            }
-        }
-        return 0.0;
+        return rating != null ? rating : 0.0;
     }
 
-    public void setRating(Object rating) {
+    public void setRating(Double rating) {
         this.rating = rating;
     }
 
