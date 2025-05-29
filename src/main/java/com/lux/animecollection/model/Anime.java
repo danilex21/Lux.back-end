@@ -20,10 +20,10 @@ public class Anime {
     @Column(columnDefinition = "LONGTEXT")
     private String description;
     
-    @Column(length = 1000)
+    @Column(columnDefinition = "LONGTEXT")
     private String imageUrl;
     
-    private Double rating;
+    private Double rating = 0.0;
     
     @Column(length = 255)
     private String genre;

@@ -114,7 +114,24 @@ public class AnimeController {
         anime.setTitle(dto.getTitle());
         anime.setDescription(dto.getDescription());
         anime.setImageUrl(dto.getImageUrl());
-        anime.setRating(dto.getRating());
+        
+        // Converte o rating para Double, independente se veio como String ou Double
+        if (dto.getRating() != null) {
+            if (dto.getRating() instanceof String) {
+                try {
+                    anime.setRating(Double.parseDouble((String) dto.getRating()));
+                } catch (NumberFormatException e) {
+                    anime.setRating(0.0);
+                }
+            } else if (dto.getRating() instanceof Double) {
+                anime.setRating((Double) dto.getRating());
+            } else {
+                anime.setRating(0.0);
+            }
+        } else {
+            anime.setRating(0.0);
+        }
+        
         anime.setGenre(dto.getGenre());
         return anime;
     }
