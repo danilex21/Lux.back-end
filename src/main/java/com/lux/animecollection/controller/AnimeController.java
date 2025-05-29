@@ -65,19 +65,37 @@ public class AnimeController {
      * @param anime O objeto anime a ser criado
      * @return O DTO do anime criado
      */
-    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<?> createAnime(
-            @RequestPart("anime") String animeJson,
+            @RequestPart(value = "anime", required = false) String animeJson,
+            @RequestPart(value = "animeData", required = false) Anime animeData,
             @RequestPart(value = "image", required = false) MultipartFile imageFile) {
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            Anime anime = objectMapper.readValue(animeJson, Anime.class);
+            Anime anime;
+            
+            // Se veio como JSON
+            if (animeJson != null && !animeJson.isEmpty()) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                anime = objectMapper.readValue(animeJson, Anime.class);
+            } 
+            // Se veio como objeto direto
+            else if (animeData != null) {
+                anime = animeData;
+            } else {
+                return ResponseEntity.badRequest().body("Dados do anime não fornecidos");
+            }
             
             if (anime.getTitle() == null || anime.getTitle().trim().isEmpty()) {
                 return ResponseEntity.badRequest().body("O título do anime é obrigatório");
             }
             
-            if (imageFile != null && !imageFile.isEmpty()) {
+            // Se não veio imagem mas tem URL de imagem
+            if ((imageFile == null || imageFile.isEmpty()) && anime.getImageUrl() != null) {
+                // Aqui você pode adicionar lógica para baixar a imagem da URL se necessário
+                // Por enquanto, apenas vamos aceitar a URL
+            } 
+            // Se veio uma imagem no upload
+            else if (imageFile != null && !imageFile.isEmpty()) {
                 if (!imageFile.getContentType().startsWith("image/")) {
                     return ResponseEntity.badRequest().body("O arquivo deve ser uma imagem");
                 }
@@ -91,7 +109,7 @@ public class AnimeController {
         } catch (IOException e) {
             return ResponseEntity.badRequest().body("Erro ao processar a requisição: " + e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Erro interno ao processar a requisição");
+            return ResponseEntity.internalServerError().body("Erro interno ao processar a requisição: " + e.getMessage());
         }
     }
 
