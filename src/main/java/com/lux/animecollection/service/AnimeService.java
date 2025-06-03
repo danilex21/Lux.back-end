@@ -23,24 +23,40 @@ public class AnimeService {
         this.animeRepository = animeRepository;
     }
     
-    public List<Anime> getAllAnimes() {
+    public List<Anime> findAll() {
         logger.info("Buscando todos os animes");
         return animeRepository.findAll();
     }
     
-    public Optional<Anime> getAnimeById(Long id) {
+    public Optional<Anime> findById(Long id) {
         logger.info("Buscando anime com ID: {}", id);
         return animeRepository.findById(id);
     }
     
+    public List<Anime> findFavorites() {
+        logger.info("Buscando animes favoritos");
+        return animeRepository.findByIsFavoriteTrue();
+    }
+    
+    public List<Anime> search(String query) {
+        logger.info("Buscando animes com query: {}", query);
+        return animeRepository.findByTitleContainingIgnoreCase(query);
+    }
+    
+    public List<Anime> findByGenre(String genre) {
+        logger.info("Buscando animes do gênero: {}", genre);
+        return animeRepository.findByGenreIgnoreCase(genre);
+    }
+    
     @Transactional
-    public Anime createAnime(Anime anime) {
-        logger.info("Criando novo anime: {}", anime.getTitle());
+    public Anime save(Anime anime) {
+        logger.info("Salvando novo anime: {}", anime.getTitle());
         return animeRepository.save(anime);
     }
     
     @Transactional
-    public Anime updateAnime(Long id, Anime animeDetails) {
+    public Anime update(Long id, Anime animeDetails) {
+        logger.info("Atualizando anime com ID: {}", id);
         return animeRepository.findById(id).map(existingAnime -> {
             if (animeDetails.getTitle() != null) {
                 existingAnime.setTitle(animeDetails.getTitle());
@@ -54,21 +70,25 @@ public class AnimeService {
             if (animeDetails.getGenre() != null) {
                 existingAnime.setGenre(animeDetails.getGenre());
             }
-            if (animeDetails.getImageData() != null) {
-                existingAnime.setImageData(animeDetails.getImageData());
-                existingAnime.setImageType(animeDetails.getImageType());
+            if (animeDetails.getImageUrl() != null) {
+                existingAnime.setImageUrl(animeDetails.getImageUrl());
             }
+
             return animeRepository.save(existingAnime);
-        }).orElse(null);
+        }).orElseThrow(() -> new RuntimeException("Anime não encontrado"));
     }
     
     @Transactional
-    public boolean deleteAnime(Long id) {
-        try {
-            animeRepository.deleteById(id);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+    public Anime toggleFavorite(Long id) {
+        logger.info("Alternando status de favorito para anime com ID: {}", id);
+        Anime anime = findById(id).orElseThrow(() -> new RuntimeException("Anime não encontrado"));
+        anime.setFavorite(!anime.isFavorite());
+        return animeRepository.save(anime);
+    }
+    
+    @Transactional
+    public void delete(Long id) {
+        logger.info("Deletando anime com ID: {}", id);
+        animeRepository.deleteById(id);
     }
 }

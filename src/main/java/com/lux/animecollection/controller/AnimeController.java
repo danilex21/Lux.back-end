@@ -1,131 +1,105 @@
 package com.lux.animecollection.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lux.animecollection.dto.AnimeDTO;
 import com.lux.animecollection.model.Anime;
 import com.lux.animecollection.service.AnimeService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
-/**
- * Controlador responsável por gerenciar as operações de API relacionadas aos animes.
- * Fornece endpoints para listar, buscar, criar, atualizar e excluir animes.
- */
 @RestController
 @RequestMapping("/api/animes")
-@CrossOrigin(
-    origins = "*",
-    allowedHeaders = {"Content-Type", "Authorization"},
-    methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE}
-)
+@CrossOrigin(origins = "*")
 public class AnimeController {
-
-    /**
-     * Serviço que contém a lógica de negócios para operações com animes.
-     */
+    
+    private static final Logger logger = LoggerFactory.getLogger(AnimeController.class);
+    
+    private final AnimeService animeService;
+    
     @Autowired
-    private AnimeService animeService;
-    
-    /**
-     * Retorna uma lista de todos os animes disponíveis.
-     * Converte cada entidade Anime para AnimeDTO antes de retornar.
-     * 
-     * @return Lista de DTOs de animes
-     */
+    public AnimeController(AnimeService animeService) {
+        this.animeService = animeService;
+    }
+
     @GetMapping
-    public List<AnimeDTO> getAllAnimes() {
-        return animeService.getAllAnimes().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }   
+    public ResponseEntity<List<Anime>> getAllAnimes() {
+        logger.info("Recebendo requisição para listar todos os animes");
+        return ResponseEntity.ok(animeService.findAll());
+    }
 
-    /**
-     * Busca um anime específico pelo seu ID.
-     * 
-     * @param id O identificador único do anime
-     * @return O DTO do anime encontrado ou vazio se não existir
-     */
     @GetMapping("/{id}")
-    public Optional<AnimeDTO> getAnimeById(@PathVariable Long id) {
-        return animeService.getAnimeById(id).map(this::convertToDTO);
-    }
-    
-    /**
-     * Cria um novo anime no sistema.
-     * 
-     * @param anime O objeto anime a ser criado
-     * @return O DTO do anime criado
-     */
-    @PostMapping
-    public ResponseEntity<?> createAnime(@RequestBody Anime anime) {
-        try {
-            if (anime.getTitle() == null || anime.getTitle().trim().isEmpty()) {
-                return ResponseEntity.badRequest().body("O título do anime é obrigatório");
-            }
-            
-            Anime createdAnime = animeService.createAnime(anime);
-            return ResponseEntity.ok(convertToDTO(createdAnime));
-            
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Erro ao salvar o anime: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Retorna a imagem de um anime específico.
-     * 
-     * @param id O identificador único do anime
-     * @return A imagem do anime encontrado ou 404 se não existir
-     */
-    @GetMapping("/{id}/image")
-    public ResponseEntity<byte[]> getAnimeImage(@PathVariable Long id) {
-        return animeService.getAnimeById(id)
-                .map(anime -> ResponseEntity.ok()
-                        .contentType(MediaType.parseMediaType(anime.getImageType()))
-                        .body(anime.getImageData()))
+    public ResponseEntity<Anime> getAnime(@PathVariable Long id) {
+        logger.info("Recebendo requisição para buscar anime com ID: {}", id);
+        return animeService.findById(id)
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    /**
-     * Remove um anime do sistema.
-     * 
-     * @param id O identificador único do anime a ser removido
-     * @return true se o anime foi removido com sucesso, false caso contrário
-     */
-    @DeleteMapping("/{id}")
-    public boolean deleteAnime(@PathVariable Long id) {
-        return animeService.deleteAnime(id);
+    @GetMapping("/favorites")
+    public ResponseEntity<List<Anime>> getFavoriteAnimes() {
+        logger.info("Recebendo requisição para listar animes favoritos");
+        return ResponseEntity.ok(animeService.findFavorites());
     }
 
-    /**
-     * Método auxiliar para converter uma entidade Anime em um DTO.
-     * 
-     * @param anime A entidade Anime a ser convertida
-     * @return O DTO correspondente à entidade
-     */
-    private AnimeDTO convertToDTO(Anime anime) {
-        if (anime == null) return null;
-        
-        AnimeDTO dto = new AnimeDTO();
-        dto.setId(anime.getId());
-        dto.setTitle(anime.getTitle());
-        dto.setDescription(anime.getDescription());
-        dto.setRating(anime.getRating());
-        dto.setGenre(anime.getGenre());
-        
-        // Set image URL if image data exists
-        if (anime.getImageData() != null && anime.getImageType() != null) {
-            dto.setImageUrl(anime.getImageUrl());
+    @GetMapping("/search")
+    public ResponseEntity<List<Anime>> searchAnimes(@RequestParam String query) {
+        logger.info("Recebendo requisição para buscar animes com query: {}", query);
+        return ResponseEntity.ok(animeService.search(query));
+    }
+
+    @GetMapping("/genre/{genre}")
+    public ResponseEntity<List<Anime>> getAnimesByGenre(@PathVariable String genre) {
+        logger.info("Recebendo requisição para listar animes do gênero: {}", genre);
+        return ResponseEntity.ok(animeService.findByGenre(genre));
+    }
+
+    @PostMapping
+    public ResponseEntity<Anime> createAnime(@RequestBody Anime anime) {
+        logger.info("Recebendo requisição para criar novo anime: {}", anime.getTitle());
+        try {
+            return ResponseEntity.ok(animeService.save(anime));
+        } catch (Exception e) {
+            logger.error("Erro ao criar anime: {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
         }
-        
-        return dto;
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Anime> updateAnime(@PathVariable Long id, @RequestBody Anime anime) {
+        logger.info("Recebendo requisição para atualizar anime com ID: {}", id);
+        try {
+            return ResponseEntity.ok(animeService.update(id, anime));
+        } catch (RuntimeException e) {
+            logger.error("Erro ao atualizar anime: {}", e.getMessage());
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            logger.error("Erro ao atualizar anime: {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PutMapping("/{id}/favorite")
+    public ResponseEntity<Anime> toggleFavorite(@PathVariable Long id) {
+        logger.info("Recebendo requisição para alternar favorito do anime com ID: {}", id);
+        try {
+            return ResponseEntity.ok(animeService.toggleFavorite(id));
+        } catch (RuntimeException e) {
+            logger.error("Erro ao alternar favorito: {}", e.getMessage());
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteAnime(@PathVariable Long id) {
+        logger.info("Recebendo requisição para deletar anime com ID: {}", id);
+        try {
+            animeService.delete(id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            logger.error("Erro ao deletar anime: {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 }

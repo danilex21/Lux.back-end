@@ -1,46 +1,23 @@
 package com.lux.animecollection.model;
 
-import jakarta.persistence.*;
-import lombok.Data;
-import java.util.Base64;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 
-@Data
 @Entity
-@Table(name = "animes")
 public class Anime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    @Column(name = "title", length = 255, nullable = false)
     private String title;
-    
-    @Column(columnDefinition = "LONGTEXT")
     private String description;
-    
-    @Lob
-    @Column(columnDefinition = "LONGBLOB")
-    private byte[] imageData;
-    
-    @Column(name = "image_type")
-    private String imageType;
-    
     private Double rating;
-    
-    @Column(length = 255)
     private String genre;
+    private String imageUrl;
+    private boolean isFavorite;
     
-    public Anime() {
-    }
-
-    public Anime(Long id, String title, String description, String imageUrl, Double rating, String genre) {
-        this.id = id;
-        this.title = title;
-        this.description = description;
-        this.rating = rating;
-        this.genre = genre;
-    }
-
+    // Getters e Setters
     public Long getId() {
         return id;
     }
@@ -65,41 +42,6 @@ public class Anime {
         this.description = description;
     }
 
-    public String getImageUrl() {
-        if (imageData == null || imageType == null) {
-            return null;
-        }
-        return "data:" + imageType + ";base64," + java.util.Base64.getEncoder().encodeToString(imageData);
-    }
-
-    public void setImageUrl(String imageUrl) {
-        if (imageUrl != null && imageUrl.contains(",")) {
-            String[] parts = imageUrl.split(",");
-            if (parts.length > 1) {
-                this.imageData = java.util.Base64.getDecoder().decode(parts[1]);
-                if (parts[0].contains(":") && parts[0].contains(";")) {
-                    this.imageType = parts[0].substring(parts[0].indexOf(":") + 1, parts[0].indexOf(";"));
-                }
-            }
-        }
-    }
-    
-    public byte[] getImageData() {
-        return imageData;
-    }
-    
-    public void setImageData(byte[] imageData) {
-        this.imageData = imageData;
-    }
-    
-    public String getImageType() {
-        return imageType;
-    }
-    
-    public void setImageType(String imageType) {
-        this.imageType = imageType;
-    }
-
     public Double getRating() {
         return rating;
     }
@@ -114,5 +56,21 @@ public class Anime {
 
     public void setGenre(String genre) {
         this.genre = genre;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public boolean isFavorite() {
+        return isFavorite;
+    }
+
+    public void setFavorite(boolean favorite) {
+        isFavorite = favorite;
     }
 }

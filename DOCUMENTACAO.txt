@@ -1,0 +1,94 @@
+DOCUMENTAÇÃO DO PROJETO LUX ANIME COLLECTION
+=========================================
+
+1. MODELO (Anime.java)
+----------------------
+- Classe que representa um anime no sistema
+- Atributos principais:
+  * id: Identificador único
+  * title: Título do anime
+  * description: Descrição
+  * rating: Avaliação
+  * genre: Gênero
+  * imageUrl: URL da imagem
+  * isFavorite: Status de favorito
+  * isFeatured: Status de destaque
+  * malId: ID do MyAnimeList
+  * status: Status do anime (ex: Em andamento, Concluído)
+  * episodes: Número de episódios
+  * type: Tipo do anime
+  * season: Temporada
+  * year: Ano de lançamento
+  * studio: Estúdio produtor
+  * source: Fonte original
+  * duration: Duração dos episódios
+  * ageRating: Classificação etária
+
+2. REPOSITÓRIO (AnimeRepository.java)
+------------------------------------
+- Interface que gerencia o acesso ao banco de dados
+- Métodos de busca:
+  * findAll(): Lista todos os animes
+  * findById(): Busca por ID
+  * findByIsFeaturedTrue(): Lista animes em destaque
+  * findByIsFavoriteTrue(): Lista favoritos
+  * findByTitleContainingIgnoreCase(): Busca por título
+  * findByGenreIgnoreCase(): Busca por gênero
+
+3. SERVIÇO (AnimeService.java)
+-----------------------------
+- Classe que implementa a lógica de negócios
+- Funcionalidades:
+  * Busca de animes (todos, por ID, destaque, favoritos)
+  * Busca por título e gênero
+  * Criação e atualização de animes
+  * Toggle de favoritos e destaque
+  * Remoção de animes
+- Inclui logs para todas as operações
+- Tratamento de exceções
+- Transações gerenciadas (@Transactional)
+
+4. CONTROLLER (AnimeController.java)
+----------------------------------
+- Gerencia as requisições HTTP
+- Endpoints disponíveis:
+  * GET /api/animes: Lista todos
+  * GET /api/animes/{id}: Busca por ID
+  * GET /api/animes/featured: Lista em destaque
+  * GET /api/animes/favorites: Lista favoritos
+  * GET /api/animes/search: Busca por título
+  * GET /api/animes/genre/{genre}: Lista por gênero
+  * POST /api/animes: Cria novo
+  * PUT /api/animes/{id}: Atualiza
+  * PUT /api/animes/{id}/favorite: Toggle favorito
+  * PUT /api/animes/{id}/featured: Toggle destaque
+  * DELETE /api/animes/{id}: Remove
+- Respostas HTTP apropriadas
+- Logs detalhados
+- Tratamento de erros
+
+FLUXO DE DADOS
+-------------
+1. Cliente faz requisição HTTP
+2. Controller recebe e valida
+3. Service processa a lógica
+4. Repository acessa o banco
+5. Resposta retorna ao cliente
+
+SEGURANÇA E BOAS PRÁTICAS
+------------------------
+- Validação de dados
+- Tratamento de exceções
+- Logs para auditoria
+- Transações gerenciadas
+- Respostas HTTP apropriadas
+- CORS configurado
+- Injeção de dependências
+
+TECNOLOGIAS UTILIZADAS
+---------------------
+- Spring Boot
+- Spring Data JPA
+- MySQL
+- SLF4J para logs
+- REST API 
