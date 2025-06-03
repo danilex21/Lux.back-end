@@ -1,7 +1,7 @@
 # 🎬 Lux Anime Collection - Backend
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/danilex21/Lux.front-end-expo/main/assets/icon.png" alt="Lux Anime Collection Logo" width="200"/>
+
   
   [![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://www.java.com)
   [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.1-brightgreen.svg)](https://spring.io/projects/spring-boot)
