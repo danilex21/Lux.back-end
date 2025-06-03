@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Column;
 
 @Entity
 public class Anime {
@@ -14,9 +15,12 @@ public class Anime {
     private String description;
     private Double rating;
     private String genre;
+    @Column(length = 1000)
     private String imageUrl;
     private boolean isFavorite;
-    
+    private boolean isFeatured;
+    private Long malId;
+
     // Getters e Setters
     public Long getId() {
         return id;
@@ -73,4 +77,20 @@ public class Anime {
     public void setFavorite(boolean favorite) {
         isFavorite = favorite;
     }
-}
+
+    public boolean isFeatured() {
+        return isFeatured;
+    }
+
+    public void setFeatured(boolean featured) {
+        isFeatured = featured;
+    }
+
+    public Long getMalId() {
+        return malId;
+    }
+
+    public void setMalId(Long malId) {
+        this.malId = malId;
+    }
+} 

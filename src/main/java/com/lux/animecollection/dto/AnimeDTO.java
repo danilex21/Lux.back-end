@@ -4,9 +4,9 @@ public class AnimeDTO {
     private Long id;
     private String title;
     private String description;
-    private String imageUrl;
     private Double rating;
     private String genre;
+    private String imageUrl;
 
     // Construtor vazio
     public AnimeDTO() {
