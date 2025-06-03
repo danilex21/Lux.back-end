@@ -104,11 +104,28 @@ public class AnimeService {
     }
 
     private void validateAnime(Anime anime) {
+        if (anime == null) {
+            throw new IllegalArgumentException("Dados do anime não podem ser nulos");
+        }
+        
         if (anime.getTitle() == null || anime.getTitle().trim().isEmpty()) {
             throw new IllegalArgumentException("Título do anime é obrigatório");
         }
+        
         if (anime.getRating() != null && (anime.getRating() < 0 || anime.getRating() > 10)) {
             throw new IllegalArgumentException("Avaliação deve estar entre 0 e 10");
+        }
+        
+        if (anime.getGenre() != null && anime.getGenre().trim().isEmpty()) {
+            throw new IllegalArgumentException("Gênero não pode estar vazio se fornecido");
+        }
+        
+        if (anime.getDescription() != null && anime.getDescription().trim().isEmpty()) {
+            throw new IllegalArgumentException("Descrição não pode estar vazia se fornecida");
+        }
+        
+        if (anime.getImageUrl() != null && anime.getImageUrl().trim().isEmpty()) {
+            throw new IllegalArgumentException("URL da imagem não pode estar vazia se fornecida");
         }
     }
 }

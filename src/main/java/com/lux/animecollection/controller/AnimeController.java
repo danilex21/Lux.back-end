@@ -7,7 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/animes")
@@ -56,19 +58,40 @@ public class AnimeController {
     }
 
     @PostMapping
-    public ResponseEntity<Anime> createAnime(@RequestBody Anime anime) {
+    public ResponseEntity<?> createAnime(@RequestBody Anime anime) {
         logger.info("Recebendo requisição para criar novo anime: {}", anime);
         try {
-            if (anime.getTitle() == null || anime.getTitle().trim().isEmpty()) {
-                logger.error("Título do anime é obrigatório");
-                return ResponseEntity.badRequest().build();
+            if (anime == null) {
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "Dados do anime não podem ser nulos");
+                return ResponseEntity.badRequest().body(error);
             }
+
+            if (anime.getTitle() == null || anime.getTitle().trim().isEmpty()) {
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "Título do anime é obrigatório");
+                return ResponseEntity.badRequest().body(error);
+            }
+
+            if (anime.getRating() != null && (anime.getRating() < 0 || anime.getRating() > 10)) {
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "Avaliação deve estar entre 0 e 10");
+                return ResponseEntity.badRequest().body(error);
+            }
+
             Anime savedAnime = animeService.save(anime);
             logger.info("Anime criado com sucesso: {}", savedAnime);
             return ResponseEntity.ok(savedAnime);
+        } catch (IllegalArgumentException e) {
+            logger.error("Erro de validação ao criar anime: {}", e.getMessage());
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
         } catch (Exception e) {
             logger.error("Erro ao criar anime: {}", e.getMessage());
-            return ResponseEntity.badRequest().build();
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Erro interno ao criar anime");
+            return ResponseEntity.badRequest().body(error);
         }
     }
 
