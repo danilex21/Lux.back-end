@@ -2,9 +2,9 @@ name: Deploy to Render
 
 on:
   push:
-    branches: [ devolps ]
+    branches: [ develops ]
   pull_request:
-    branches: [ devolps ]
+    branches: [ develops ]
 
 jobs:
   build-and-deploy:
