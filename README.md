@@ -1,59 +1,48 @@
-# Anime Collection Backend 🎬
+# Lux Anime Collection - Backend
 
-Este é o backend do aplicativo Anime Collection, desenvolvido com Spring Boot 3.2.1 e Java 21. 🚀
+Backend para o aplicativo Lux Anime Collection, desenvolvido com Spring Boot.
 
-## Requisitos 📋
+## Tecnologias
 
-- Java 21 ☕
-- MySQL 🛢️
-- Maven 🔧
+- Java 21
+- Spring Boot 3.2.1
+- MySQL
+- Maven
 
-## Endpoints da API 🌐
+## Configuração
 
- **Acesse a documentação da API**
-   - Abra o navegador e acesse: http://localhost:8080/swagger-ui.html
+1. Clone o repositório
+2. Configure o banco de dados no `application.properties`
+3. Execute `mvn spring-boot:run`
 
-### Animes 📺
+## Endpoints
 
-- `GET /api/animes` - Lista todos os animes 📋
-- `GET /api/animes/{id}` - Obtém um anime específico 🔍
-- `POST /api/animes` - Cria um novo anime ➕
-- `PUT /api/animes/{id}` - Atualiza um anime existente 🔄
-- `DELETE /api/animes/{id}` - Remove um anime ❌
+### Animes
+- `GET /api/animes` - Lista todos os animes
+- `GET /api/animes/{id}` - Busca anime por ID
+- `GET /api/animes/favorites` - Lista animes favoritos
+- `GET /api/animes/search?query={query}` - Busca animes por título
+- `GET /api/animes/genre/{genre}` - Lista animes por gênero
+- `POST /api/animes` - Cria novo anime
+- `PUT /api/animes/{id}` - Atualiza anime
+- `PUT /api/animes/{id}/favorite` - Alterna favorito
+- `DELETE /api/animes/{id}` - Remove anime
 
-## Modelo de Dados 💾
-
-### Anime 🎭
+## Modelo
 
 ```json
 {
-  "id": 1,
-  "title": "Nome do Anime",
-  "description": "Descrição do Anime",
-  "imageUrl": "URL da Imagem",
-  "rating": 4.5,
-  "genre": "Ação"
+  "id": "Long",
+  "title": "String",
+  "description": "String",
+  "rating": "Double",
+  "genre": "String",
+  "imageUrl": "String",
+  "isFavorite": "Boolean"
 }
 ```
 
-## Desenvolvimento 👨‍💻
+## Desenvolvimento
 
-O projeto usa as seguintes tecnologias:
-
-- Spring Boot 🍃
-- Spring Data JPA 📊
-- MySQL 🛢️
-- Spring Boot DevTools 🛠️
-- SpringDoc OpenAPI (Swagger) 📚
-
-## Documentação da API 📖
-
-A documentação da API está disponível através do Swagger UI. Após iniciar a aplicação, acesse:
-
-```
-http://localhost:8080/swagger-ui/index.html
-```
-
-## Configuração do Banco de Dados 🗄️
-
-O banco de dados será criado automaticamente ao iniciar a aplicação pela primeira vez. Certifique-se de que o MySQL está em execução e que as credenciais no arquivo `application.properties` estão corretas. ✅
+- Frontend: [Lux.front-end-expo](https://github.com/danilex21/Lux.front-end-expo)
+- Backend: Este repositório

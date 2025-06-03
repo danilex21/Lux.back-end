@@ -57,9 +57,15 @@ public class AnimeController {
 
     @PostMapping
     public ResponseEntity<Anime> createAnime(@RequestBody Anime anime) {
-        logger.info("Recebendo requisição para criar novo anime: {}", anime.getTitle());
+        logger.info("Recebendo requisição para criar novo anime: {}", anime);
         try {
-            return ResponseEntity.ok(animeService.save(anime));
+            if (anime.getTitle() == null || anime.getTitle().trim().isEmpty()) {
+                logger.error("Título do anime é obrigatório");
+                return ResponseEntity.badRequest().build();
+            }
+            Anime savedAnime = animeService.save(anime);
+            logger.info("Anime criado com sucesso: {}", savedAnime);
+            return ResponseEntity.ok(savedAnime);
         } catch (Exception e) {
             logger.error("Erro ao criar anime: {}", e.getMessage());
             return ResponseEntity.badRequest().build();
@@ -70,6 +76,10 @@ public class AnimeController {
     public ResponseEntity<Anime> updateAnime(@PathVariable Long id, @RequestBody Anime anime) {
         logger.info("Recebendo requisição para atualizar anime com ID: {}", id);
         try {
+            if (anime.getTitle() == null || anime.getTitle().trim().isEmpty()) {
+                logger.error("Título do anime é obrigatório");
+                return ResponseEntity.badRequest().build();
+            }
             return ResponseEntity.ok(animeService.update(id, anime));
         } catch (RuntimeException e) {
             logger.error("Erro ao atualizar anime: {}", e.getMessage());

@@ -50,31 +50,42 @@ public class AnimeService {
     
     @Transactional
     public Anime save(Anime anime) {
-        logger.info("Salvando novo anime: {}", anime.getTitle());
-        return animeRepository.save(anime);
+        logger.info("Salvando novo anime: {}", anime);
+        try {
+            validateAnime(anime);
+            return animeRepository.save(anime);
+        } catch (Exception e) {
+            logger.error("Erro ao salvar anime: {}", e.getMessage());
+            throw new RuntimeException("Erro ao salvar anime: " + e.getMessage());
+        }
     }
     
     @Transactional
     public Anime update(Long id, Anime animeDetails) {
         logger.info("Atualizando anime com ID: {}", id);
         return animeRepository.findById(id).map(existingAnime -> {
-            if (animeDetails.getTitle() != null) {
-                existingAnime.setTitle(animeDetails.getTitle());
+            try {
+                validateAnime(animeDetails);
+                if (animeDetails.getTitle() != null) {
+                    existingAnime.setTitle(animeDetails.getTitle());
+                }
+                if (animeDetails.getDescription() != null) {
+                    existingAnime.setDescription(animeDetails.getDescription());
+                }
+                if (animeDetails.getRating() != null) {
+                    existingAnime.setRating(animeDetails.getRating());
+                }
+                if (animeDetails.getGenre() != null) {
+                    existingAnime.setGenre(animeDetails.getGenre());
+                }
+                if (animeDetails.getImageUrl() != null) {
+                    existingAnime.setImageUrl(animeDetails.getImageUrl());
+                }
+                return animeRepository.save(existingAnime);
+            } catch (Exception e) {
+                logger.error("Erro ao atualizar anime: {}", e.getMessage());
+                throw new RuntimeException("Erro ao atualizar anime: " + e.getMessage());
             }
-            if (animeDetails.getDescription() != null) {
-                existingAnime.setDescription(animeDetails.getDescription());
-            }
-            if (animeDetails.getRating() != null) {
-                existingAnime.setRating(animeDetails.getRating());
-            }
-            if (animeDetails.getGenre() != null) {
-                existingAnime.setGenre(animeDetails.getGenre());
-            }
-            if (animeDetails.getImageUrl() != null) {
-                existingAnime.setImageUrl(animeDetails.getImageUrl());
-            }
-
-            return animeRepository.save(existingAnime);
         }).orElseThrow(() -> new RuntimeException("Anime não encontrado"));
     }
     
@@ -90,5 +101,14 @@ public class AnimeService {
     public void delete(Long id) {
         logger.info("Deletando anime com ID: {}", id);
         animeRepository.deleteById(id);
+    }
+
+    private void validateAnime(Anime anime) {
+        if (anime.getTitle() == null || anime.getTitle().trim().isEmpty()) {
+            throw new IllegalArgumentException("Título do anime é obrigatório");
+        }
+        if (anime.getRating() != null && (anime.getRating() < 0 || anime.getRating() > 10)) {
+            throw new IllegalArgumentException("Avaliação deve estar entre 0 e 10");
+        }
     }
 }
