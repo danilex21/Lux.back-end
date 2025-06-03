@@ -2,9 +2,9 @@ name: Deploy to Render
 
 on:
   push:
-    branches: [ develops ]
+    branches: [ devolps ]
   pull_request:
-    branches: [ develops ]
+    branches: [ devolps ]
 
 jobs:
   build-and-deploy:
@@ -22,6 +22,21 @@ jobs:
     
     - name: Build with Maven
       run: mvn -B package --file pom.xml
+    
+    - name: Check current deploy status
+      id: check-deploy
+      env:
+        RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+        RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+      run: |
+        DEPLOY_STATUS=$(curl -s "https://api.render.com/v1/services/$RENDER_SERVICE_ID" \
+          -H "Authorization: Bearer $RENDER_API_KEY" \
+          | jq -r '.deploy.status')
+        echo "Current deploy status: $DEPLOY_STATUS"
+        if [ "$DEPLOY_STATUS" = "in_progress" ]; then
+          echo "Deploy in progress, waiting..."
+          sleep 30
+        fi
     
     - name: Deploy to Render
       env:
