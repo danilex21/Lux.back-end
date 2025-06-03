@@ -5,6 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Column;
+import jakarta.persistence.Lob;
 
 @Entity
 public class Anime {
@@ -15,8 +16,11 @@ public class Anime {
     private String description;
     private Double rating;
     private String genre;
-    @Column(length = 1000)
+    
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String imageUrl;
+    
     private boolean isFavorite;
     private boolean isFeatured;
     private Long malId;
